@@ -22,7 +22,7 @@ def page(name, title, body, detail=False):
     active = 'discover.html' if detail else name
     nav = ''.join(f'<a href="{pre}{file}"'+(' aria-current="page"' if active == file else '')+f'>{label}</a>' for file,label in [('index.html','首页'),('discover.html','发现动漫'),('watchlist.html','想看清单'),('about.html','关于')])
     html = f'''<!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="六部动漫，无剧透介绍。按今天的心情，发现下一段故事。"><title>{e(title)} · 今晚看什么</title><link rel="stylesheet" href="{pre}assets/css/styles.css"></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="六部动漫，无剧透介绍。按今天的心情，发现下一段故事。"><title>{e(title)} · 今晚看什么</title><link rel="stylesheet" href="{pre}assets/css/styles.css"><link rel="stylesheet" href="{pre}assets/css/refinement.css"></head>
 <body><a class="skip" href="#main">跳转到正文</a><header class="header"><div class="wrap nav"><a class="brand" href="{pre}index.html"><span aria-hidden="true">☾</span> 今晚看什么<small>AN EVENING, A STORY</small></a><nav aria-label="主导航">{nav}</nav></div></header><main id="main" tabindex="-1">{body}</main><footer class="wrap footer"><a class="brand" href="{pre}index.html">☾ 今晚看什么</a><p>每个平凡的夜晚，都值得一个好故事。</p><a href="{pre}about.html">选片方法与资料说明</a><small>无剧透精选 · 推荐为编辑判断 · 作品资料见详情来源</small></footer></body></html>'''
     (OUT / name).write_text(html, encoding='utf-8')
 
