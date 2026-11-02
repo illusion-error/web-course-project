@@ -1,0 +1,87 @@
+[
+  {
+    "path": "/",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "about.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "discover.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "index.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "watchlist.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "anime/a-place-further-than-the-universe.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "anime/frieren.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "anime/haikyu.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "anime/laid-back-camp.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "anime/natsume-yujincho.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "anime/spy-family.html",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "assets/css/refinement.css",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "assets/css/styles.css",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "assets/js/catalog.js",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "assets/js/filter.js",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "assets/js/watchlist-store.js",
+    "status": 200,
+    "matches_local": true
+  },
+  {
+    "path": "assets/js/watchlist.js",
+    "status": 200,
+    "matches_local": true
+  }
+]
