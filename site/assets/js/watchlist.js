@@ -1,7 +1,8 @@
 (() => {
   'use strict';
   const catalog = window.ANIME_CATALOG;
-  const store = window.createWatchlistStore(() => window.localStorage, catalog);
+  const english = document.documentElement.lang === 'en';
+  const store = window.createWatchlistStore(() => window.localStorage, catalog, english);
   const feedback = document.querySelector('#save-feedback');
   const panel = document.querySelector('#watchlist-panel');
   const grid = document.querySelector('#saved-grid');
@@ -16,8 +17,8 @@
     node.type = 'button';
     node.className = 'save-button';
     node.dataset.save = item.id;
-    node.textContent = remove ? '移除' : saved ? '已加入 · 取消想看' : '加入想看';
-    node.setAttribute('aria-label', `${node.textContent}：${item.title}`);
+    node.textContent = remove ? (english ? 'Remove' : '移除') : saved ? (english ? 'Saved · Remove' : '已加入 · 取消想看') : (english ? 'Save to watchlist' : '加入想看');
+    node.setAttribute('aria-label', `${node.textContent}${english ? ': ' : '：'}${item.title}`);
     node.setAttribute('aria-pressed', String(saved));
     return node;
   }
@@ -55,7 +56,7 @@
       card.append(label, heading, summary, remove);
       grid.append(card);
     }
-    document.querySelector('#saved-count').textContent = store.readable() ? `我的想看清单 · ${ids.length} 部` : '清单暂时无法读取';
+    document.querySelector('#saved-count').textContent = store.readable() ? (english ? `My watchlist · ${ids.length}` : `我的想看清单 · ${ids.length} 部`) : (english ? 'Watchlist unavailable' : '清单暂时无法读取');
     document.querySelector('#saved-empty').hidden = ids.length !== 0 || !store.readable();
     clearButton.disabled = !ids.length || !store.readable();
   }
@@ -75,7 +76,7 @@
     const removing = ids.includes(item.id);
     const failure = store.save(removing ? ids.filter(id => id !== item.id) : [...ids, item.id]);
     render();
-    message(failure || `《${item.title}》${removing ? '已移出清单' : '已加入想看'}。`, Boolean(failure));
+    message(failure || (english ? `${item.title} ${removing ? "removed" : "saved"}.` : `《${item.title}》${removing ? '已移出清单' : '已加入想看'}。`), Boolean(failure));
     if (panel) document.querySelector('#saved-count').focus();
   });
   if (panel) {
@@ -90,7 +91,7 @@
       const error = store.read() || store.save([]);
       confirmation.hidden = true;
       render();
-      message(error || '想看清单已清空。', Boolean(error));
+      message(error || (english ? 'Watchlist cleared.' : '想看清单已清空。'), Boolean(error));
       document.querySelector('#saved-count').focus();
     });
   }

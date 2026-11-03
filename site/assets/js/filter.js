@@ -13,6 +13,8 @@
   const valid = (select, value) => [...select.options].some(o => o.value === value) ? value : '';
   const normalize = value => value.normalize('NFKC').toLowerCase();
 
+  const english = document.documentElement.lang === 'en';
+  const titles = n => n === 1 ? '1 title' : n + ' titles';
   function restore() {
     const params = new URLSearchParams(location.search);
     query.value = (params.get('q') || '').trim().slice(0, 100);
@@ -29,12 +31,13 @@
     for (const section of sections) {
       const total = [...section.querySelectorAll('.card')].filter(c => !c.hidden).length;
       section.hidden = total === 0;
-      section.querySelector('.section-title > span').textContent = `${total} 部作品`;
+      section.querySelector('.section-title > span').textContent = english ? titles(total) : `${total} 部作品`;
     }
-    count.textContent = `共找到 ${visible} 部作品`;
+    count.textContent = english ? titles(visible) : `共找到 ${visible} 部作品`;
     empty.hidden = visible !== 0;
     // Normalize unsupported parameters without inserting another history entry.
     writeURL(false, true);
+    window.dispatchEvent(new Event('filters-restored'));
   }
 
   function writeURL(push, preserveHash = false) {
