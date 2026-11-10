@@ -7,6 +7,7 @@
 - [二十部作品完整资料（中英双语底稿）](docs/ANIME-COLLECTION-20.md)
 - [早期六部作品资料](docs/ANIME-SITE-CONTENT.md)
 - [开发记录](docs/DEVLOG.md)
+- [课程提交对照清单](docs/SUBMISSION-CHECKLIST.md)
 
 采用原生 HTML/CSS/JavaScript 多页静态方案，无需后端或数据库。发布目录为 site/。目录收录二十部作品，提供中英双语：各 4 个公共页与 20 个详情页；卡片与详情页使用作品官方海报/主视觉，首页背景为自制装饰图形。已完成三种视口的布局检查及键盘基础检查。搜索与联合筛选已完成（批次 C）；收藏、移除、清空和本地保存已完成（批次 D）；已通过 GitHub Pages 正式上线；真实手机及浏览器原生 200% 缩放仍待验收。
 
