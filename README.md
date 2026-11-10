@@ -1,43 +1,34 @@
-# 今晚看什么 · 网站课程项目
+# 今晚看什么 · Anime Tonight
 
-面向动漫观众的精选指南：通过题材与心情寻找作品，阅读无剧透介绍并保存想看清单。
+面向动漫观众的精选指南：按题材与心情浏览二十部作品，阅读无剧透介绍，并把想看的故事保存到本地清单。
 
-- [正式课程要求](docs/COURSE-REQUIREMENTS.md)
-- [详细实施计划与验收任务](docs/IMPLEMENTATION-PLAN.md)
-- [二十部作品完整资料（中英双语底稿）](docs/ANIME-COLLECTION-20.md)
-- [早期六部作品资料](docs/ANIME-SITE-CONTENT.md)
-- [开发记录](docs/DEVLOG.md)
-- [课程提交对照清单](docs/SUBMISSION-CHECKLIST.md)
+## 在线访问
 
-采用原生 HTML/CSS/JavaScript 多页静态方案，无需后端或数据库。发布目录为 site/。目录收录二十部作品，提供中英双语：各 4 个公共页与 20 个详情页；卡片与详情页使用作品官方海报/主视觉，首页背景为自制装饰图形。已完成三种视口的布局检查及键盘基础检查。搜索与联合筛选已完成（批次 C）；收藏、移除、清空和本地保存已完成（批次 D）；已通过 GitHub Pages 正式上线；真实手机及浏览器原生 200% 缩放仍待验收。
+- 英文版本（提交入口）：https://illusion-error.github.io/tonight-anime-site/en/
+- 中文版本：https://illusion-error.github.io/tonight-anime-site/
 
-本地预览：`python -m http.server 8000 --bind 127.0.0.1 --directory site`，打开 http://127.0.0.1:8000/ 。
+站点为中英双语，页内导航可在两种语言间切换。
 
-- [批次 B 检查记录](docs/BATCH-B-RESULTS.md)
-- [桌面首页截图](docs/screenshots/b-home-desktop.png)
-- [手机尺寸详情截图](docs/screenshots/b-detail-mobile.png)
+## 内容与功能
 
-《我推的孩子》已从内容目录替换为《夏目友人帐》。早期 Django 初稿不属于静态成品，已备份到项目目录外的 `../anime-site-django-draft-backup/`，未纳入版本库与发布目录。Git 历史保留真实过程。
+- 二十部精选动漫，每部含无剧透简介、推荐理由、适合人群与观看前提示。
+- 按题材与心情浏览，支持名称搜索与题材、心情联合筛选。
+- 想看清单：加入、移除、清空，仅保存在当前浏览器。
+- 卡片与详情页使用作品官方海报/主视觉；首页背景为自制的月亮、山峦与星空装饰图形。
+- 响应式布局，适配桌面与手机屏幕；采用语义化标记与键盘可达设计。
 
-- [批次 C 实现与验收记录](docs/BATCH-C-RESULTS.md)
+## 技术方案
 
-- [批次 D 验收记录](docs/BATCH-D-RESULTS.md)
+原生 HTML / CSS / JavaScript 多页静态站点，无需后端服务或数据库。页面由 `scripts/` 下的生成脚本从中英文案底稿产出，成品位于 `site/` 目录。
 
-## 公网访问
+## 仓库结构
 
-- 英文提交入口（课程系统提交此地址）：https://illusion-error.github.io/tonight-anime-site/en/
-- 中文语言版本：https://illusion-error.github.io/tonight-anime-site/
+- **源码仓库** `web-course-project`（私有）：生成脚本、中英文案底稿、文档与站点成品。
+- **发布仓库** `tonight-anime-site`（公开）：仅包含 `site/` 内的静态 HTML/CSS/JS、海报与图标，以及 `.nojekyll`；GitHub Pages 从 `main` 根目录部署，是线上成品的发布副本。
 
-站点为中英双语，导航可在两种语言间切换。课程提交说明与展示以英文版为准，中文版作为语言版本保留。
+改动先在源码仓库完成、测试并提交，再把 `site/` 同步到发布仓库；仅推送源码仓库不会自动更新网页。
 
-## 仓库结构（两个仓库）
-
-- **课程源码 / 过程仓库**：`web-course-project`（私有，origin）。保存生成脚本、中英文案底稿、文档、`site/` 生成结果与完整 Git 历史。课程要求的“每周逐步发展”的真实提交过程以本仓库为准，答辩展示本仓库历史。
-- **Pages 发布仓库**：`tonight-anime-site`（公开）。只包含 `site/` 内的静态 HTML/CSS/JS、海报与图标，以及 `.nojekyll`；GitHub Pages 从 `main` 根目录部署。该仓库是线上成品的发布副本，不代表课程开发过程。
-
-修改流程：先在源码仓库完成改动、测试并提交，再把 `site/` 同步到发布仓库；仅推送源码仓库不会自动更新网页。
-
-## 课程提交材料（五张图片）
+## 提交材料（五张图片）
 
 | 用途 | 文件 | 规格 |
 | --- | --- | --- |
@@ -49,4 +40,6 @@
 
 每个页面 `<head>` 均包含 `og:title`、`og:description`、`og:image`、`og:url`（另含 `og:type`、`og:locale`、`twitter:card`），并引用上述 favicon 与 apple-touch-icon。
 
-[上线验收、部署更新方法与检查边界](docs/BATCH-E-RESULTS.md)。收藏仅保存在同一浏览器、同一来源，localhost 收藏不会自动迁移到公网。
+想看清单仅保存在同一浏览器、同一来源，不会跨设备或跨来源同步。
+
+[课程提交对照清单](docs/SUBMISSION-CHECKLIST.md)。
