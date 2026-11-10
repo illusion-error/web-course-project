@@ -1,19 +1,18 @@
-"""Generate favicon, app icon and OG cover over the dark night background (English only)."""
+"""Generate favicon, app icon and OG cover over the soft aesthetic background (English only)."""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 ICON_DIR = ROOT / 'site/assets/icons'
 ICON_DIR.mkdir(parents=True, exist_ok=True)
-BG_PATH = ROOT / 'scripts/assets/bg-night-dark.png'
+BG_PATH = ROOT / 'scripts/assets/bg-night-soft.png'
 
-# Dark-night brand palette
-WHITE = (255, 255, 255)
-CREAM = (255, 244, 229)
-GOLD = (242, 201, 138)
-ROSE = (232, 155, 180)
-MIST = (216, 212, 234)
-ICON_BG = (28, 25, 55)
+# Soft pastel brand palette
+INK = (48, 52, 81)
+MUTED = (98, 103, 129)
+VIOLET = (101, 86, 152)
+ROSE = (189, 98, 138)
+PAPER = (251, 250, 255)
 
 GEORGIA = r'C:\Windows\Fonts\georgia.ttf'
 GEORGIA_BOLD = r'C:\Windows\Fonts\georgiab.ttf'
@@ -35,15 +34,15 @@ def spaced_text(draw, xy, text, font, fill, tracking=0):
 
 
 def make_icon(size):
-    base = Image.new('RGBA', (size, size), ICON_BG + (255,))
+    base = Image.new('RGBA', (size, size), PAPER + (255,))
     d = ImageDraw.Draw(base)
     c1 = (size * 0.64, size * 0.38)
     r1 = size * 0.30
-    d.ellipse([c1[0] - r1, c1[1] - r1, c1[0] + r1, c1[1] + r1], fill=CREAM)
+    d.ellipse([c1[0] - r1, c1[1] - r1, c1[0] + r1, c1[1] + r1], fill=VIOLET)
     c2 = (size * 0.74, size * 0.30)
     r2 = size * 0.27
-    d.ellipse([c2[0] - r2, c2[1] - r2, c2[0] + r2, c2[1] + r2], fill=ICON_BG + (255,))
-    four_point_star(d, size * 0.30, size * 0.68, size * 0.11, GOLD)
+    d.ellipse([c2[0] - r2, c2[1] - r2, c2[0] + r2, c2[1] + r2], fill=PAPER + (255,))
+    four_point_star(d, size * 0.30, size * 0.68, size * 0.11, ROSE)
     return base
 
 
@@ -52,14 +51,14 @@ def make_og_cover():
     if BG_PATH.exists():
         img = Image.open(BG_PATH).convert('RGBA').resize((W, H), Image.LANCZOS)
     else:
-        img = Image.new('RGBA', (W, H), (28, 25, 55, 255))
+        img = Image.new('RGBA', (W, H), (233, 186, 211, 255))
 
-    # gentle left scrim to keep the light copy legible
+    # light left scrim so the dark copy stays legible over the misty sky
     scrim = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     sd = ImageDraw.Draw(scrim)
     for x in range(W):
-        a = int(90 * max(0, 1 - x / (W * 0.65)))
-        sd.line([(x, 0), (x, H)], fill=(16, 13, 34, a))
+        a = int(150 * max(0, 1 - x / (W * 0.7)))
+        sd.line([(x, 0), (x, H)], fill=(247, 243, 252, a))
     img.alpha_composite(scrim)
 
     d = ImageDraw.Draw(img)
@@ -68,11 +67,11 @@ def make_og_cover():
     f_desc = ImageFont.truetype(GEORGIA, 28)
     f_note = ImageFont.truetype(SEGOE_LIGHT, 19)
 
-    spaced_text(d, (96, 168), 'AN EVENING, A STORY', f_eyebrow, GOLD, tracking=10)
-    d.text((92, 218), 'Anime Tonight', font=f_title, fill=WHITE)
-    d.text((98, 340), 'Twenty spoiler-free anime picks,', font=f_desc, fill=MIST)
-    d.text((98, 384), 'matched to your mood.', font=f_desc, fill=MIST)
-    spaced_text(d, (98, 466), 'NO SPOILERS · JUST STORIES', f_note, GOLD, tracking=6)
+    spaced_text(d, (96, 168), 'AN EVENING, A STORY', f_eyebrow, VIOLET, tracking=10)
+    d.text((92, 218), 'Anime Tonight', font=f_title, fill=INK)
+    d.text((98, 340), 'Twenty spoiler-free anime picks,', font=f_desc, fill=MUTED)
+    d.text((98, 384), 'matched to your mood.', font=f_desc, fill=MUTED)
+    spaced_text(d, (98, 466), 'NO SPOILERS · JUST STORIES', f_note, ROSE, tracking=6)
 
     return img.convert('RGB')
 
