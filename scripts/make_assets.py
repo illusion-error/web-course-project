@@ -1,16 +1,16 @@
-"""Generate favicon, app icon and OG cover: soft lavender, cute and gentle (English only)."""
+"""Generate favicon, app icon and OG cover: soft lavender rooftop night (English only)."""
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
 ICON_DIR = ROOT / 'site/assets/icons'
 ICON_DIR.mkdir(parents=True, exist_ok=True)
+BG_PATH = ROOT / 'scripts' / 'assets' / 'bg-moonbranch.png'
 
 VIOLET = (117, 100, 163)
 ROSE = (201, 122, 156)
 INK = (54, 52, 84)
 MUTED = (110, 108, 138)
-PAPER = (251, 250, 255)
 MOON = (255, 246, 232)
 STAR = (255, 246, 223)
 BG_TOP = (237, 235, 248)
@@ -62,59 +62,46 @@ def make_icon(size):
     return base
 
 
-def smooth_hills(img, circles, color):
-    layer = Image.new('RGBA', img.size, (0, 0, 0, 0))
-    ld = ImageDraw.Draw(layer)
-    for cx, cy, r in circles:
-        ld.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color)
-    img.alpha_composite(layer)
+def cover_fit(im, W, H):
+    w, h = im.size
+    target = W / H
+    cur = w / h
+    if cur > target:
+        nw = int(h * target)
+        left = (w - nw) // 2
+        im = im.crop((left, 0, left + nw, h))
+    else:
+        nh = int(w / target)
+        top = (h - nh) // 2
+        im = im.crop((0, top, w, top + nh))
+    return im.resize((W, H), Image.LANCZOS)
 
 
 def make_og_cover():
     W, H = 1200, 630
-    img = vgradient(W, H, BG_TOP, BG_BOT).convert('RGBA')
+    bg = Image.open(BG_PATH).convert('RGB')
+    bg = cover_fit(bg, W, H)
+    img = bg.convert('RGBA')
 
-    # soft clouds, kept away from the copy block
-    clouds = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    cd = ImageDraw.Draw(clouds)
-    cd.ellipse([720, 330, 1180, 395], fill=(255, 255, 255, 50))
-    clouds = clouds.filter(ImageFilter.GaussianBlur(18))
-    img.alpha_composite(clouds)
+    # gentle left wash for copy legibility, keeping the illustration on the right
+    wash = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+    wd = ImageDraw.Draw(wash)
+    wd.rectangle([0, 0, 500, H], fill=(251, 250, 255, 90))
+    wash = wash.filter(ImageFilter.GaussianBlur(40))
+    img.alpha_composite(wash)
 
-    # cute moon with layered glow and blush
-    mc = (930, 238)
-    mr = 138
-    glow = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    gd = ImageDraw.Draw(glow)
-    gd.ellipse([mc[0] - mr * 1.7, mc[1] - mr * 1.7, mc[0] + mr * 1.7, mc[1] + mr * 1.7],
-               fill=(226, 196, 220, 70))
-    glow = glow.filter(ImageFilter.GaussianBlur(36))
-    img.alpha_composite(glow)
     d = ImageDraw.Draw(img)
-    d.ellipse([mc[0] - mr, mc[1] - mr, mc[0] + mr, mc[1] + mr], fill=MOON)
-
-    # rounded hills along the bottom
-    smooth_hills(img, [(-150, 860, 320), (350, 880, 290), (820, 860, 340), (1260, 880, 310)],
-                 (150, 138, 190, 120))
-    smooth_hills(img, [(100, 930, 340), (600, 940, 320), (1120, 930, 360)],
-                 (110, 100, 155, 150))
-
-    # sparkles: dots plus four-point stars
-    for x, y, r in [(180, 120, 3), (360, 96, 2), (700, 110, 2), (1060, 130, 3), (1120, 300, 2)]:
-        d.ellipse([x - r, y - r, x + r, y + r], fill=STAR + (220,))
-    four_point_star(d, 815, 150, 24, VIOLET)
-    four_point_star(d, 1045, 350, 16, ROSE)
-
-    f_eyebrow = ImageFont.truetype(SEGOE_BOLD, 27)
-    f_title = ImageFont.truetype(GEORGIA_BOLD, 72)
+    f_eyebrow = ImageFont.truetype(SEGOE_BOLD, 24)
+    f_title = ImageFont.truetype(GEORGIA_BOLD, 64)
     f_desc = ImageFont.truetype(GEORGIA, 28)
 
-    spaced_text(d, (96, 158), 'AN EVENING, A STORY', f_eyebrow, VIOLET, tracking=10)
-    d.ellipse([98, 214, 112, 228], fill=ROSE)
-    d.ellipse([124, 214, 138, 228], fill=VIOLET)
-    d.text((94, 240), 'Anime Tonight', font=f_title, fill=INK)
-    d.text((98, 360), 'Twenty spoiler-free anime picks,', font=f_desc, fill=MUTED)
-    d.text((98, 402), 'matched to your mood.', font=f_desc, fill=MUTED)
+    spaced_text(d, (96, 136), 'AN EVENING, A STORY', f_eyebrow, VIOLET, tracking=4)
+    d.ellipse([98, 192, 112, 206], fill=ROSE)
+    d.ellipse([124, 192, 138, 206], fill=VIOLET)
+    d.text((94, 224), 'Anime', font=f_title, fill=INK)
+    d.text((94, 304), 'Tonight', font=f_title, fill=INK)
+    d.text((98, 410), 'Twenty spoiler-free anime picks,', font=f_desc, fill=MUTED)
+    d.text((98, 452), 'matched to your mood.', font=f_desc, fill=MUTED)
 
     return img.convert('RGB')
 
