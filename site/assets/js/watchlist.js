@@ -41,6 +41,15 @@
       const item = catalog.find(item => item.id === id);
       const card = document.createElement('article');
       card.className = 'card saved-card';
+      const art = document.createElement('a');
+      art.className = 'card-art';
+      art.href = item.path;
+      const img = document.createElement('img');
+      img.className = 'art-img';
+      img.src = (english ? '../' : '') + item.image;
+      img.alt = item.title;
+      img.loading = 'lazy';
+      art.append(img);
       const label = document.createElement('p');
       label.className = 'eyebrow';
       label.textContent = item.genre;
@@ -53,7 +62,7 @@
       summary.textContent = item.summary;
       const remove = button(item, true, true);
       remove.disabled = !store.readable();
-      card.append(label, heading, summary, remove);
+      card.append(art, label, heading, summary, remove);
       grid.append(card);
     }
     document.querySelector('#saved-count').textContent = store.readable() ? (english ? `My watchlist · ${ids.length}` : `我的想看清单 · ${ids.length} 部`) : (english ? 'Watchlist unavailable' : '清单暂时无法读取');

@@ -1,8 +1,10 @@
 """Build the English edition alongside the Chinese edition, sharing assets and IDs."""
 from pathlib import Path
 import json
+import re
 from html import escape
 from english_copy import STORIES, MOODS
+
 
 def build(out, items, scene):
     en = out / 'en'
@@ -10,42 +12,72 @@ def build(out, items, scene):
     catalog = []
     for d in items:
         title, genre, summary, *_ = STORIES[d['slug']]
-        catalog.append(dict(id=d['slug'], title=title, genre=genre, summary=summary, path=f"anime/{d['slug']}.html"))
-    (out/'assets/js/catalog-en.js').write_text('window.ANIME_CATALOG = '+json.dumps(catalog,ensure_ascii=False)+';\n',encoding='utf-8')
+        catalog.append(dict(id=d['slug'], title=title, genre=genre, summary=summary,
+                            path=f"anime/{d['slug']}.html",
+                            image=f"assets/images/{d['slug']}.jpg"))
+    (out / 'assets/js/catalog-en.js').write_text(
+        'window.ANIME_CATALOG = ' + json.dumps(catalog, ensure_ascii=False) + ';\n', encoding='utf-8')
+
+    def art_img(slug, alt, prefix=''):
+        return f'<img class="art-img" src="{prefix}assets/images/{slug}.jpg" alt="{escape(alt)}" loading="lazy">'
 
     def page(file, title, body):
         detail = file.startswith('anime/')
         pre = '../' if detail else ''
-        assets = pre+'../assets/'
-        links = [('index.html','Home'),('discover.html','Discover'),('watchlist.html','Watchlist'),('about.html','About')]
-        nav = ''.join(f'<a href="{pre}{url}"'+(' aria-current="page"' if file==url else '')+f'>{label}</a>' for url,label in links)
+        assets = pre + '../assets/'
+        links = [('index.html', 'Home'), ('discover.html', 'Discover'), ('watchlist.html', 'Watchlist'), ('about.html', 'About')]
+        nav = ''.join(f'<a href="{pre}{url}"' + (' aria-current="page"' if file == url else '') + f'>{label}</a>' for url, label in links)
         switch = f'<a class="language" data-language href="{pre}../{file}" lang="zh-CN" hreflang="zh-CN" aria-label="Switch to Chinese">中文</a>'
-        scripts = ['catalog-en','watchlist-store','watchlist','language'] + (['filter'] if file=='discover.html' else [])
+        scripts = ['catalog-en', 'watchlist-store', 'watchlist', 'language'] + (['filter'] if file == 'discover.html' else [])
         js = ''.join(f'<script defer src="{assets}js/{s}.js"></script>' for s in scripts)
-        html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{escape(title)} · Anime Tonight</title><meta name="description" content="Six anime picks for six different evenings. A spoiler-free guide to finding your next story."><link rel="stylesheet" href="{assets}css/styles.css"><link rel="stylesheet" href="{assets}css/refinement.css"></head><body><a class="skip" href="#main">Skip to content</a><header class="header"><div class="wrap nav"><a class="brand" href="{pre}index.html"><span aria-hidden="true">☾</span> Anime Tonight<small>AN EVENING, A STORY</small></a><nav aria-label="Main navigation">{nav}</nav>{switch}</div></header><main id="main" tabindex="-1">{body}</main><footer class="wrap footer"><a class="brand" href="{pre}index.html">☾ Anime Tonight</a><p>A good story for an ordinary evening.</p><a href="{pre}about.html">How we choose ↗</a><small>Six spoiler-free picks · Official sources on each story page</small></footer><div id="save-feedback" class="save-feedback" role="status"></div>{js}</body></html>'''
-        (en/file).write_text(html,encoding='utf-8')
+        html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{escape(title)} · Anime Tonight</title><meta name="description" content="Twenty anime picks for different evenings. A spoiler-free guide to finding your next story."><link rel="stylesheet" href="{assets}css/styles.css"><link rel="stylesheet" href="{assets}css/refinement.css"></head><body><a class="skip" href="#main">Skip to content</a><header class="header"><div class="wrap nav"><a class="brand" href="{pre}index.html"><span aria-hidden="true">☾</span> Anime Tonight<small>AN EVENING, A STORY</small></a><nav aria-label="Main navigation">{nav}</nav>{switch}</div></header><main id="main" tabindex="-1">{body}</main><footer class="wrap footer"><a class="brand" href="{pre}index.html">☾ Anime Tonight</a><p>A good story for an ordinary evening.</p><a href="{pre}about.html">How we choose ↗</a><small>Twenty spoiler-free picks · Official sources on each story page</small></footer><div id="save-feedback" class="save-feedback" role="status"></div>{js}</body></html>'''
+        (en / file).write_text(html, encoding='utf-8')
 
     def save(d):
         return f'<button type="button" class="save-button" data-save="{d["slug"]}" aria-pressed="false" hidden>Save to watchlist</button>'
+
+    def start_hint(d):
+        raw = d['从哪里开始']
+        if '第 3 集' in raw:
+            return 'Episode 3, or from episode 1 in order.'
+        if '2014' in raw:
+            return '2014 TV anime, season 1, episode 1.'
+        if '2009' in raw:
+            return '2009 TV anime, episode 1.'
+        return 'Season 1, episode 1.'
+
     def card(d):
-        slug=d['slug']
-        title,genre,summary,*_=STORIES[slug]
-        moods=' · '.join(MOODS[m] for m in d['心情'].split('、'))
-        return f'''<article class="card" id="{slug}" data-title="{escape(title)} {d['原名']} {d['title']}" data-genre="{d['题材']}" data-moods="{d['心情']}"><a class="card-art" href="anime/{slug}.html" tabindex="-1" aria-hidden="true">{scene(items.index(d))}<span class="art-caption">STORY {d['number']}</span></a><div class="card-body"><p class="eyebrow">{genre} · {moods}</p><h3><a href="anime/{slug}.html">{title}</a></h3><p class="original" lang="ja">{d['原名']}</p><p>{summary}</p><a class="text-link" href="anime/{slug}.html">Read the guide ↗</a>{save(d)}</div></article>'''
-    groups=[('A quieter evening','想放松',[1,0]),('A little courage','想被鼓励',[2,3]),('In good company','想慢慢品味',[4,5])]
-    moods=''.join(f'<a href="discover.html?mood={m}"><span aria-hidden="true">{icon}</span><h3>{name}</h3><p>{desc}</p></a>' for (name,m,_),icon,desc in zip(groups,'☾✦❋',['Make time for the little things.','A first step or a winning point.','Stories of unexpected friendship.']))
-    page('index.html','Home',f'''<section class="hero">{scene()}<div class="wrap hero-content"><p class="eyebrow">TONIGHT’S EDITION</p><h1>What’s on<br>tonight?</h1><p>Six anime picks, each with a different mood.<br>Find a story that suits your evening.</p><a class="button" href="discover.html">Find my next anime ↗</a><span class="hero-note">NO SPOILERS · JUST STORIES</span></div></section><div class="wrap"><section class="section"><div class="section-title"><div><p class="eyebrow">01 / FIND YOUR MOOD</p><h2>What are you in the mood for?</h2></div></div><div class="moods">{moods}</div></section><section class="section"><div class="section-title"><div><p class="eyebrow">02 / EDITOR’S SELECTION</p><h2>Tonight’s picks</h2></div><a class="text-link" href="discover.html">See all six ↗</a></div><div class="grid">{''.join(card(d) for d in items[:3])}</div></section><aside class="quote"><p>There’s more to a story than its score.</p><a href="about.html">Inside the guide ↗</a></aside></div>''')
+        slug = d['slug']
+        title, genre, summary, *_ = STORIES[slug]
+        moods = ' · '.join(MOODS[m] for m in d['心情'].split('、'))
+        return f'''<article class="card" id="{slug}" data-title="{escape(title)} {d['原名']} {d['title']}" data-genre="{d['题材']}" data-moods="{d['心情']}"><a class="card-art" href="anime/{slug}.html" tabindex="-1" aria-hidden="true">{art_img(slug, title + ' poster', '../')}<span class="art-caption">STORY {d['number']}</span></a><div class="card-body"><p class="eyebrow">{genre} · {moods}</p><h3><a href="anime/{slug}.html">{title}</a></h3><p class="original" lang="ja">{d['原名']}</p><p>{summary}</p><a class="text-link" href="anime/{slug}.html">Read the guide ↗</a>{save(d)}</div></article>'''
+
+    moods = ''.join(f'<a href="discover.html?mood={m}"><span aria-hidden="true">{icon}</span><h3>{name}</h3><p>{desc}</p></a>' for (name, m, _), icon, desc in zip(
+        [('A quieter evening', '想放松', None), ('A little courage', '想被鼓励', None), ('In good company', '想慢慢品味', None)],
+        '☾✦❋', ['Make time for the little things.', 'A first step or a winning point.', 'Stories of unexpected friendship.']))
+    page('index.html', 'Home', f'''<section class="hero">{scene()}<div class="wrap hero-content"><p class="eyebrow">TONIGHT’S EDITION</p><h1>What’s on<br>tonight?</h1><p>Twenty anime picks, each with a different mood.<br>Find a story that suits your evening.</p><a class="button" href="discover.html">Find my next anime ↗</a><span class="hero-note">NO SPOILERS · JUST STORIES</span></div></section><div class="wrap"><section class="section"><div class="section-title"><div><p class="eyebrow">01 / FIND YOUR MOOD</p><h2>What are you in the mood for?</h2></div></div><div class="moods">{moods}</div></section><section class="section"><div class="section-title"><div><p class="eyebrow">02 / EDITOR’S SELECTION</p><h2>Tonight’s picks</h2></div><a class="text-link" href="discover.html">See all twenty ↗</a></div><div class="grid">{''.join(card(d) for d in items[:3])}</div></section><aside class="quote"><p>There’s more to a story than its score.</p><a href="about.html">Inside the guide ↗</a></aside></div>''')
+
     def options(pairs):
-        return ''.join(f'<option value="{key}">{value}</option>' for key,value in pairs)
-    genre_options=options((d['题材'],STORIES[d['slug']][1]) for d in items)
-    chips=''.join(f'<a href="discover.html?mood={m}">{name}</a>' for name,m,_ in groups)
-    sections=''.join(f'<section class="section"><div class="section-title"><h2>{name}</h2><span>2 titles</span></div><div class="grid two">'+''.join(card(items[i]) for i in indexes)+'</div></section>' for name,_,indexes in groups)
-    page('discover.html','Discover',f'''<div class="wrap"><section class="page-head"><p class="eyebrow">THE COLLECTION</p><h1>Find your <em>next anime.</em></h1><p>Pick a genre or a mood, then see what makes each story worth a look.</p><nav class="chips" aria-label="Browse by mood">{chips}</nav></section><form id="filters" class="filters" method="get" hidden><div><label for="search">Search by title</label><input id="search" name="q" type="search" placeholder="English or original title" maxlength="100"></div><div><label for="genre">Genre</label><select id="genre" name="genre"><option value="">All genres</option>{genre_options}</select></div><div><label for="mood">Mood</label><select id="mood" name="mood"><option value="">Any mood</option>{options(MOODS.items())}</select></div><button class="button" type="submit">Find anime</button><button class="clear" type="button" id="clear-filters">Reset filters</button></form><noscript>Enable JavaScript to filter, or browse all six titles below.</noscript><p role="status" id="result-count">6 titles</p><section class="empty" id="no-results" hidden><h2>No matches this time</h2><p>Try another title or use fewer filters.</p><button id="clear-empty" class="button">Reset filters</button></section>{sections}</div>''')
-    import re
-    for i,d in enumerate(items):
-        title,genre,summary,*notes=STORIES[d['slug']]
-        url=re.search(r'\((https://[^)]+)\)',d['资料来源'])[1]
-        sections=''.join(f'<section><h2>{heading}</h2><p>{note}</p></section>' for heading,note in zip(['The story','Why watch','For you if…','Before you start'],notes))
-        page(f'anime/{d["slug"]}.html',title,f'''<div class="wrap"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">Home</a> / <a href="../discover.html">Discover</a> / <span>{title}</span></nav><section class="detail-hero"><div><p class="eyebrow">STORY {d['number']} / {genre}</p><h1>{title}</h1><p class="original" lang="ja">{d['原名']}</p><p class="lead">{summary}</p><span class="tag">{' · '.join(MOODS[m] for m in d['心情'].split('、'))}</span>{save(d)}</div><div class="detail-art">{scene(i)}<span class="art-caption">A STORY FOR TONIGHT</span></div></section><div class="reading-layout"><article class="reading">{sections}</article><aside class="reading-aside"><p class="eyebrow">YOUR FIRST EPISODE</p><h2>Start here</h2><p>Season 1, episode 1.</p><hr><h2>Source</h2><a href="{url}">Official anime website ↗</a><p class="fine">The premise follows the official guide. The mood and recommendation are our editorial picks.</p></aside></div><section class="next"><span>In the mood for something else?</span><a href="../discover.html" class="button">Back to Discover ↗</a></section></div>''')
-    page('watchlist.html','Watchlist','''<div class="wrap"><section class="page-head"><p class="eyebrow">YOUR NEXT STORY</p><h1>Saved for <em>another night.</em></h1><p>Your list lives in this browser. Clearing site data will remove it.</p></section><noscript>Enable JavaScript to save a watchlist, or <a href="discover.html">browse the collection</a>.</noscript><section id="watchlist-panel" hidden><div class="list-toolbar"><h2 id="saved-count" tabindex="-1">My watchlist</h2><button type="button" id="clear-list" class="clear">Clear list</button></div><div id="clear-confirm" class="clear-confirm" hidden><p>Remove every title from your watchlist? This can’t be undone.</p><button id="cancel-clear" class="clear">Cancel</button><button id="confirm-clear" class="save-button">Clear all</button></div><div id="saved-grid" class="grid"></div><section id="saved-empty" class="empty" hidden><span aria-hidden="true">☾</span><h2>Your next story goes here</h2><p>Save a title while you browse and come back when you’re ready.</p><a class="button" href="discover.html">Explore anime ↗</a></section></section></div>''')
-    page('about.html','About','''<div class="wrap"><section class="page-head"><p class="eyebrow">ABOUT THE GUIDE</p><h1>Six stories.<br><em>Your choice.</em></h1><p>For evenings when you know you want to watch anime but haven’t picked a title yet.</p></section><div class="reading-layout"><article class="reading"><section><h2>A shorter shortlist</h2><p>A ranking can tell you what’s popular. It’s harder to tell whether you’ll enjoy a quiet camping trip or a tense volleyball match tonight. That’s where this guide starts.</p></section><section><h2>How we choose</h2><p>Each pick has a genre, a mood and a spoiler-free guide. Alongside the appeal, you’ll find a note on pacing or tone to help you choose.</p></section><section><h2>Where the details come from</h2><p>Each guide links to its official anime website. The summaries and recommendations are written for this collection. Mood labels reflect editorial judgment.</p><p>AI tools helped prepare the copy and build this course project.</p></section><section><h2>About the artwork</h2><p>The moons, lakes and hills are original decorative landscapes. This independent guide offers reading notes rather than streams or downloads.</p></section></article><aside class="reading-aside"><p class="eyebrow">SMALL COLLECTION</p><h2>Find your evening</h2><p>Six titles, with a different reason to try each one.</p><a class="text-link" href="discover.html">Browse the collection ↗</a></aside></div></div>''')
+        return ''.join(f'<option value="{key}">{value}</option>' for key, value in pairs)
+    genre_seen = set()
+    genre_pairs = []
+    for d in items:
+        if d['题材'] not in genre_seen:
+            genre_seen.add(d['题材'])
+            genre_pairs.append((d['题材'], STORIES[d['slug']][1]))
+    genre_options = options(genre_pairs)
+    chips = ''.join(f'<a href="discover.html?mood={m}">{name}</a>' for name, m in
+                    [('A quieter evening', '想放松'), ('A little courage', '想被鼓励'), ('In good company', '想慢慢品味')])
+    grid = ''.join(card(d) for d in items)
+    page('discover.html', 'Discover', f'''<div class="wrap"><section class="page-head"><p class="eyebrow">THE COLLECTION</p><h1>Find your <em>next anime.</em></h1><p>Pick a genre or a mood, then see what makes each story worth a look.</p><nav class="chips" aria-label="Browse by mood">{chips}</nav></section><form id="filters" class="filters" method="get" hidden><div><label for="search">Search by title</label><input id="search" name="q" type="search" placeholder="English or original title" maxlength="100"></div><div><label for="genre">Genre</label><select id="genre" name="genre"><option value="">All genres</option>{genre_options}</select></div><div><label for="mood">Mood</label><select id="mood" name="mood"><option value="">Any mood</option>{options(MOODS.items())}</select></div><button class="button" type="submit">Find anime</button><button class="clear" type="button" id="clear-filters">Reset filters</button></form><noscript>Enable JavaScript to filter, or browse all twenty titles below.</noscript><p role="status" id="result-count">20 titles</p><section class="empty" id="no-results" hidden><h2>No matches this time</h2><p>Try another title or use fewer filters.</p><button id="clear-empty" class="button">Reset filters</button></section><section class="section"><div class="section-title"><h2>All titles</h2><span>20 titles</span></div><div class="grid">{grid}</div></section></div>''')
+
+    for d in items:
+        title, genre, summary, *notes = STORIES[d['slug']]
+        url = re.search(r'\((https://[^)]+)\)', d['资料来源'])[1]
+        sections = ''.join(f'<section><h2>{heading}</h2><p>{note}</p></section>' for heading, note in zip(
+            ['The story', 'Why watch', 'For you if…', 'Before you start'], notes))
+        page(f'anime/{d["slug"]}.html', title, f'''<div class="wrap"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="../index.html">Home</a> / <a href="../discover.html">Discover</a> / <span>{title}</span></nav><section class="detail-hero"><div><p class="eyebrow">STORY {d['number']} / {genre}</p><h1>{title}</h1><p class="original" lang="ja">{d['原名']}</p><p class="lead">{summary}</p><span class="tag">{' · '.join(MOODS[m] for m in d['心情'].split('、'))}</span>{save(d)}</div><div class="detail-art">{art_img(d['slug'], title + ' poster', '../../')}<span class="art-caption">A STORY FOR TONIGHT</span></div></section><div class="reading-layout"><article class="reading">{sections}</article><aside class="reading-aside"><p class="eyebrow">YOUR FIRST EPISODE</p><h2>Start here</h2><p>{start_hint(d)}</p><hr><h2>Source</h2><a href="{url}">Official anime website ↗</a><p class="fine">The premise follows the official guide. The mood and recommendation are our editorial picks.</p></aside></div><section class="next"><span>In the mood for something else?</span><a href="../discover.html" class="button">Back to Discover ↗</a></section></div>''')
+
+    page('watchlist.html', 'Watchlist', '''<div class="wrap"><section class="page-head"><p class="eyebrow">YOUR NEXT STORY</p><h1>Saved for <em>another night.</em></h1><p>Your list lives in this browser. Clearing site data will remove it.</p></section><noscript>Enable JavaScript to save a watchlist, or <a href="discover.html">browse the collection</a>.</p></noscript><section id="watchlist-panel" hidden><div class="list-toolbar"><h2 id="saved-count" tabindex="-1">My watchlist</h2><button type="button" id="clear-list" class="clear">Clear list</button></div><div id="clear-confirm" hidden><p>Remove every title from your watchlist? This can’t be undone.</p><button id="cancel-clear" class="clear">Cancel</button><button id="confirm-clear" class="save-button">Clear all</button></div><div id="saved-grid" class="grid"></div><section id="saved-empty" class="empty" hidden><span aria-hidden="true">☾</span><h2>Your next story goes here</h2><p>Save a title while you browse and come back when you’re ready.</p><a class="button" href="discover.html">Explore anime ↗</a></section></section></div>''')
+
+    page('about.html', 'About', '''<div class="wrap"><section class="page-head"><p class="eyebrow">ABOUT THE GUIDE</p><h1>Twenty stories.<br><em>Your choice.</em></h1><p>For evenings when you know you want to watch anime but haven’t picked a title yet.</p></section><div class="reading-layout"><article class="reading"><section><h2>A shorter shortlist</h2><p>A ranking can tell you what’s popular. It’s harder to tell whether you’ll enjoy a quiet camping trip or a tense volleyball match tonight. That’s where this guide starts.</p></section><section><h2>How we choose</h2><p>Each pick has a genre, a mood and a spoiler-free guide. Alongside the appeal, you’ll find a note on pacing or tone to help you choose.</p></section><section><h2>Where the details come from</h2><p>Each guide links to its official anime website. The summaries and recommendations are written for this collection. Mood labels reflect editorial judgment.</p><p>AI tools helped prepare the copy and build this course project.</p></section><section><h2>About the artwork</h2><p>The posters and key visuals on cards and detail pages are official promotional images used for display only. The moons, lakes and hills in the hero background are original decoration. This independent guide offers reading notes rather than streams or downloads.</p></section></article><aside class="reading-aside"><p class="eyebrow">SMALL COLLECTION</p><h2>Find your evening</h2><p>Twenty titles, with a different reason to try each one.</p><a class="text-link" href="discover.html">Browse the collection ↗</a></aside></div></div>''')
