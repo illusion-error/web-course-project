@@ -40,7 +40,8 @@ a:focus-visible { outline: 3px solid #754590; outline-offset: 4px; border-radius
 .hero-note { font-size: .75rem; letter-spacing: .14em; }
 .button { padding: .8rem 1.5rem; min-height: 48px; border-radius: 1rem; background: #62518c; box-shadow: 0 8px 18px #62518c25; gap: 1rem; font-size: 1rem; }
 .vertical { background: #393750a8; border-radius: 20px; padding: 1.3rem .5rem; font-size: .85rem; }
-.scene { background: radial-gradient(ellipse at 68% 24%, #f2dff13d, transparent 50%), linear-gradient(170deg,#596b9c,#a6a7d0 45%,#e1bfd0 78%,#eddadf); }
+.scene { background: url("../images/hero-moonbranch.jpg") center right / cover no-repeat, radial-gradient(ellipse at 68% 24%, #f2dff13d, transparent 50%), linear-gradient(170deg,#596b9c,#a6a7d0 45%,#e1bfd0 78%,#eddadf); }
+.scene .moon, .scene .cloud, .scene .ridge, .scene .lake, .scene .star { display: none; }
 .ridge { clip-path: none; border-radius: 50% 70% 0 0 / 70% 90% 0 0; transform: rotate(-9deg); bottom: -7%; }
 .ridge-a { left: -15%; height: 45%; width: 95%; background: #707aab; opacity: .68; }
 .ridge-b { left: 38%; bottom: -14%; height: 40%; width: 95%; background: #505f8b; transform: rotate(8deg); }

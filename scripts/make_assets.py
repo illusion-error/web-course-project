@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ICON_DIR = ROOT / 'site/assets/icons'
 ICON_DIR.mkdir(parents=True, exist_ok=True)
 BG_PATH = ROOT / 'scripts' / 'assets' / 'bg-moonbranch.png'
+HERO_PATH = ROOT / 'site' / 'assets' / 'images' / 'hero-moonbranch.jpg'
 
 VIOLET = (117, 100, 163)
 ROSE = (201, 122, 156)
@@ -106,7 +107,16 @@ def make_og_cover():
     return img.convert('RGB')
 
 
+def export_hero():
+    bg = Image.open(BG_PATH).convert('RGB')
+    bg = cover_fit(bg, 1600, 630)
+    HERO_PATH.parent.mkdir(parents=True, exist_ok=True)
+    bg.save(HERO_PATH, 'JPEG', quality=85)
+
+
 make_icon(32).save(ICON_DIR / 'favicon-32.png', 'PNG')
 make_icon(180).save(ICON_DIR / 'apple-touch-icon.png', 'PNG')
 make_og_cover().save(ICON_DIR / 'og-cover.jpg', 'JPEG', quality=90)
+export_hero()
 print('Generated icons:', [p.name for p in ICON_DIR.iterdir()])
+print('Hero background:', HERO_PATH.name)
