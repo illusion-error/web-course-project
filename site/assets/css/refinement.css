@@ -93,7 +93,9 @@ a:focus-visible { outline: 3px solid #754590; outline-offset: 4px; border-radius
 .reading section { padding-bottom: 1.3rem; border-bottom: 1px solid #ebe5ed; }
 .reading h2 { font-size: 1.55rem; }
 .reading p { color: #51566c; line-height: 2; }
-.reading-aside { border-radius: 1.5rem; background: #f0eaf5; padding: 1.75rem; }
+.reading-aside { border-radius: 1.5rem; background: #f0eaf5; padding: 1.75rem; position: sticky; top: 2rem; align-self: start; }
+.reading-aside h2 { margin-top: .5rem; }
+.reading-aside p { line-height: 1.9; margin-bottom: 1.2rem; }
 .reading-aside a { display: inline-block; padding-block: .4rem; }
 .fine { font-size: .875rem; }
 .empty { border-radius: 2rem; background: #f1edf7; }
@@ -169,4 +171,5 @@ html[lang=en] .reading p {line-height:1.7}
  .hero-content {padding-block:clamp(2.6rem,8vw,4rem)}
  .moods>a {display:flow-root}
  .section-title {align-items:flex-start}
+ .reading-aside {position:static}
 }
