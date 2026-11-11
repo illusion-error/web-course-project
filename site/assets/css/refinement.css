@@ -103,6 +103,9 @@ a:focus-visible { outline: 3px solid #754590; outline-offset: 4px; border-radius
 .footer small { font-size: .8125rem; }
 .footer a { min-height: 44px; display: inline-flex; align-items: center; }
 .skip { border-radius: .7rem; }
+#cat-cursor { position: fixed; top: 0; left: 0; width: 72px; height: 72px; pointer-events: none; z-index: 9999; opacity: 0; filter: drop-shadow(0 3px 6px rgba(48, 50, 70, .35)); transition: opacity .2s ease, width .15s ease, height .15s ease; will-change: transform; }
+#cat-cursor.is-hover { width: 82px; height: 82px; }
+body.has-cat-cursor, body.has-cat-cursor a, body.has-cat-cursor button, body.has-cat-cursor [role="button"] { cursor: none; }
 @media (hover:hover) and (prefers-reduced-motion:no-preference) {
   .card,.button,.moods>a { transition: box-shadow .2s ease, background-color .2s ease, border-color .2s ease; }
 }
